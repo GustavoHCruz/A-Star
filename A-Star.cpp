@@ -2,15 +2,12 @@
 #include <vector>    //Vectors Structure
 #include <algorithm> //Heap Structure
 #include <string>    //String Structure
-#include "Heuristic_1.h"
-#include "Heuristic_2.h"
-#include "Heuristic_3.h"
-#include "Heuristic_4.h"
-#include "Heuristic_5.h"
 #define NIL -1
 #define inf 2147483647
 
 using namespace std;
+
+#include "Heuristics.h"
 
 struct vertex
 {
@@ -34,10 +31,9 @@ struct A_Star
 int findBlank(vector<int> state)
 {
     for (int i = 0; i < 16; i++)
-    {
         if (state.at(i) == 0)
             return i;
-    }
+
     return NIL;
 }
 
@@ -52,9 +48,9 @@ vertex blankSwap(vector<int> state, int i, int j)
     return ret;
 }
 
-vector<vertex> generateSuccessors(A_Star &tree, vertex parent)
+void generateSuccessors(A_Star *tree,vertex parent)
 {
-    int blankPosition = findBlank(parent.state) + 1;
+    int blankPosition = findBlank(parent.state);
     vector<vertex> children;
 
     if (blankPosition == 0)
@@ -119,21 +115,43 @@ vector<vertex> generateSuccessors(A_Star &tree, vertex parent)
 
     for (vertex v : children)
     {
-        v.name = tree.currentStateIndex++;
+        v.name = tree->currentStateIndex++;
         v.parent = parent.name;
+        tree->A.push_back(v);
     }
-    return children;
 }
 
-int A_Star_Algorithm(A_Star *tree, vector<int> entry)
+bool comp(vertex x, vertex y)
+{
+    return x.f_cost < y.f_cost;
+}
+
+void initializeTree(A_Star *tree, vector<int> entry)
 {
     vertex root;
     root.g_cost = 0;
+    root.h_cost = heuristic_1(entry, tree->T);
+    root.f_cost = root.g_cost + root.h_cost;
     root.name = tree->currentStateIndex++;
     root.parent = NIL;
     root.state = entry;
     tree->S = entry;
     tree->A.push_back(root);
+    make_heap(tree->A.begin(), tree->A.end(), comp);
+}
+
+int A_Star_Algorithm(A_Star *tree, vector<int> entry)
+{
+    bool end = false;
+
+    initializeTree(&(*tree), entry);
+
+    while (!end)
+    {
+        sort_heap(tree->A.begin(), tree->A.end(), comp);
+        vertex parent = tree->A.front();
+        generateSuccessors(&(*tree),parent);
+    }
 }
 
 vector<int> split(string entry, char separator)
@@ -158,5 +176,5 @@ int main()
     while (in.at(0) == ' ')
         in.erase(0, 1);
     vector<int> entry = split(in, ' ');
-    A_Star_Algorithm(&tree,entry);
+    A_Star_Algorithm(&tree, entry);
 }
