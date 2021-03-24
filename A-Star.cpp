@@ -1,10 +1,7 @@
 #include <iostream>
-#include <random>
-#include <vector>
-#include <queue>
-#include <stack>
-#include <assert.h>
-#include <algorithm>
+#include <vector>    //Vectors Structure
+#include <algorithm> //Heap Structure
+#include <string>    //String Structure
 #include "Heuristic_1.h"
 #include "Heuristic_2.h"
 #include "Heuristic_3.h"
@@ -28,11 +25,10 @@ struct vertex
 struct A_Star
 {
     vector<int> S;             // Entry
-    vector<vertex> StatesTree; // 1x1 index map here?
-    vector<int> A;             // Heap here?
-    vector<int> F;             // Heap here?
-    int currentStateIndex = 0; // index to map
-    vector<int> answer = {1, 5, 9, 13, 2, 6, 10, 14, 3, 7, 11, 15, 4, 8, 12, 0};
+    vector<vertex> A;          // Open set
+    vector<vertex> F;          // Closed set
+    int currentStateIndex = 0; // Name index
+    vector<int> T = {1, 5, 9, 13, 2, 6, 10, 14, 3, 7, 11, 15, 4, 8, 12, 0};
 };
 
 int findBlank(vector<int> state)
@@ -42,6 +38,7 @@ int findBlank(vector<int> state)
         if (state.at(i) == 0)
             return i;
     }
+    return NIL;
 }
 
 vertex blankSwap(vector<int> state, int i, int j)
@@ -55,7 +52,7 @@ vertex blankSwap(vector<int> state, int i, int j)
     return ret;
 }
 
-void generateSuccessors(A_Star &tree, vertex parent)
+vector<vertex> generateSuccessors(A_Star &tree, vertex parent)
 {
     int blankPosition = findBlank(parent.state) + 1;
     vector<vertex> children;
@@ -112,7 +109,7 @@ void generateSuccessors(A_Star &tree, vertex parent)
         children.push_back(blankSwap(parent.state, blankPosition, blankPosition + 4));
     }
 
-    else if (blankPosition == 5 || blankPosition == 9 || blankPosition == 6 || blankPosition == 10)
+    else
     {
         children.push_back(blankSwap(parent.state, blankPosition, blankPosition - 1));
         children.push_back(blankSwap(parent.state, blankPosition, blankPosition + 1));
@@ -125,16 +122,41 @@ void generateSuccessors(A_Star &tree, vertex parent)
         v.name = tree.currentStateIndex++;
         v.parent = parent.name;
     }
+    return children;
 }
 
-int A_Star_Algorithm()
+int A_Star_Algorithm(A_Star *tree, vector<int> entry)
 {
-    cout << "Maybe Tomorrow";
+    vertex root;
+    root.g_cost = 0;
+    root.name = tree->currentStateIndex++;
+    root.parent = NIL;
+    root.state = entry;
+    tree->S = entry;
+    tree->A.push_back(root);
+}
+
+vector<int> split(string entry, char separator)
+{
+    size_t start = 0, end = 0;
+    vector<int> result;
+
+    while ((end = entry.find(separator, start)) != string::npos)
+    {
+        result.push_back((stoi(entry.substr(start, end - start), nullptr)));
+        start = end + 1;
+    }
+    result.push_back((stoi(entry.substr(start), nullptr)));
+    return result;
 }
 
 int main()
 {
     A_Star tree;
-    cout << tree.answer[0];
-    A_Star_Algorithm();
+    string in;
+    getline(cin, in);
+    while (in.at(0) == ' ')
+        in.erase(0, 1);
+    vector<int> entry = split(in, ' ');
+    A_Star_Algorithm(&tree,entry);
 }
