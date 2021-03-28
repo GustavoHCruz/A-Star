@@ -3,11 +3,9 @@
 #include <algorithm> //Heap Structure
 #include <string>    //String Structure
 #define NIL -1
-#define inf 2147483647
+#define heuristic_used 1
 
 using namespace std;
-
-#include "Heuristics.h"
 
 struct vertex
 {
@@ -28,9 +26,28 @@ struct A_Star
     vector<int> T = {1, 5, 9, 13, 2, 6, 10, 14, 3, 7, 11, 15, 4, 8, 12, 0};
 };
 
+int heuristic_1(vector<int> state, vector<int> answer)
+{
+    int counter = 0;
+    int i;
+    for (i = 0; i < 16; i++)
+        if (state.at(i) != answer.at(i)){
+            counter++;
+        }
+
+    return counter;
+}
+
+int heuristics(int h, vector<int> v, vector<int> answer)
+{
+    if (h == 1)
+        return heuristic_1(v, answer);
+    return NIL;
+}
+
 int findBlank(vector<int> state)
 {
-    for (int i = 0; i < 16; i++)
+    for (size_t i = 0; i < 16; i++)
         if (state.at(i) == 0)
             return i;
 
@@ -48,9 +65,9 @@ vertex blankSwap(vector<int> state, int i, int j)
     return ret;
 }
 
-void generateSuccessors(A_Star *tree,vertex parent)
+vector<vertex> generateSuccessors(A_Star *tree, vertex parent)
 {
-    int blankPosition = findBlank(parent.state);
+    size_t blankPosition = findBlank(parent.state);
     vector<vertex> children;
 
     if (blankPosition == 0)
@@ -113,12 +130,7 @@ void generateSuccessors(A_Star *tree,vertex parent)
         children.push_back(blankSwap(parent.state, blankPosition, blankPosition + 4));
     }
 
-    for (vertex v : children)
-    {
-        v.name = tree->currentStateIndex++;
-        v.parent = parent.name;
-        tree->A.push_back(v);
-    }
+    return children;
 }
 
 bool comp(vertex x, vertex y)
@@ -130,7 +142,7 @@ void initializeTree(A_Star *tree, vector<int> entry)
 {
     vertex root;
     root.g_cost = 0;
-    root.h_cost = heuristic_1(entry, tree->T);
+    root.h_cost = heuristics(heuristic_used, entry, tree->T);
     root.f_cost = root.g_cost + root.h_cost;
     root.name = tree->currentStateIndex++;
     root.parent = NIL;
@@ -138,10 +150,38 @@ void initializeTree(A_Star *tree, vector<int> entry)
     tree->S = entry;
     tree->A.push_back(root);
     make_heap(tree->A.begin(), tree->A.end(), comp);
+    make_heap(tree->F.begin(), tree->F.end(), comp);
+}
+
+int find_m(A_Star *tree, vertex m)
+{
+    int i = 0;
+    for (vertex v : tree->A)
+    {
+        if (m.state == v.state)
+            return i;
+        i++;
+    }
+    return NIL;
+}
+
+void find_duplicated(A_Star *tree, vertex m)
+{
+    int i = 0;
+    for (vertex v : tree->A)
+    {
+        if (m.state == v.state)
+            if (m.g_cost < v.g_cost)
+                tree->A.erase(tree->A.begin() + i);
+
+        i++;
+    }
 }
 
 int A_Star_Algorithm(A_Star *tree, vector<int> entry)
 {
+    int answer = 0;
+    vector<vertex> children;
     bool end = false;
 
     initializeTree(&(*tree), entry);
@@ -149,9 +189,39 @@ int A_Star_Algorithm(A_Star *tree, vector<int> entry)
     while (!end)
     {
         sort_heap(tree->A.begin(), tree->A.end(), comp);
+        sort_heap(tree->F.begin(), tree->F.end(), comp);
+
         vertex parent = tree->A.front();
-        generateSuccessors(&(*tree),parent);
+        tree->A.erase(tree->A.begin());
+        tree->F.push_back(parent);
+
+        children = generateSuccessors(&(*tree), parent);
+
+        for (vertex m : children)
+        {
+            m.g_cost = parent.g_cost + 1;
+
+            find_duplicated(&(*tree), m);
+
+            if (find_m(&(*tree), m) == NIL)
+            {
+                m.parent = parent.name;
+                m.h_cost = heuristics(heuristic_used, m.state, tree->T);
+                m.f_cost = m.g_cost + m.h_cost;
+                tree->A.push_back(m);
+            }
+        }
+
+        for (vertex v : tree->A)
+        {
+            if(v.state == tree->T){
+                end = true;
+                answer = v.g_cost;
+            }
+        }
     }
+
+    return answer;
 }
 
 vector<int> split(string entry, char separator)
@@ -176,5 +246,5 @@ int main()
     while (in.at(0) == ' ')
         in.erase(0, 1);
     vector<int> entry = split(in, ' ');
-    A_Star_Algorithm(&tree, entry);
+    cout << A_Star_Algorithm(&tree, entry);
 }
