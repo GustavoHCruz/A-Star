@@ -5,7 +5,7 @@
 #include <assert.h>  // Assertion Library
 
 #define NIL -1
-#define heuristic_used 1 // Determines the heuristic to be used
+#define heuristic_used 3 // Determines the heuristic to be used
 
 using namespace std;
 
@@ -33,15 +33,9 @@ int heuristic_1(vector<int> state, vector<int> answer)
 {
     int counter = 0;
     for (int i = 0; i < 16; i++)
-    {
         if (state.at(i) != 0)
-        {
             if (state.at(i) != answer.at(i))
-            {
                 counter++;
-            }
-        }
-    }
 
     return counter;
 }
@@ -298,25 +292,25 @@ int main()
     vector<int> i = {5, 13, 6, 10, 1, 7, 2, 9, 4, 3, 15, 14, 8, 0, 11, 12}; // = 20 (Extra 1)
     vector<int> j = {2, 10, 11, 9, 3, 1, 0, 13, 4, 6, 7, 14, 5, 8, 12, 15}; // = 27 (Extra 2)
 
-    //assert(A_Star_Algorithm(&A, a) == 8);
-    //assert(A_Star_Algorithm(&B, b) == 10);
-    //assert(A_Star_Algorithm(&C, c) == 15);
-    //assert(A_Star_Algorithm(&D, d) == 18);
-    //assert(A_Star_Algorithm(&E, e) == 30);
-    //assert(A_Star_Algorithm(&F, f) == 30);
-    //assert(A_Star_Algorithm(&G, g) == 25);
-    //assert(A_Star_Algorithm(&H, h) == 46);
-    //assert(A_Star_Algorithm(&I, i) == 20);
-    //assert(A_Star_Algorithm(&J, j) == 27);
+    assert(A_Star_Algorithm(&A, a) == 8);
+    assert(A_Star_Algorithm(&B, b) == 10);
+    assert(A_Star_Algorithm(&C, c) == 15);
+    assert(A_Star_Algorithm(&D, d) == 18);
+    assert(A_Star_Algorithm(&E, e) == 30);
+    assert(A_Star_Algorithm(&F, f) == 30);
+    assert(A_Star_Algorithm(&G, g) == 25);
+    assert(A_Star_Algorithm(&H, h) == 46);
+    assert(A_Star_Algorithm(&I, i) == 20);
+    assert(A_Star_Algorithm(&J, j) == 27);
 
-    cout << A_Star_Algorithm(&A, a) << endl;
-    cout << A_Star_Algorithm(&B, b) << endl;
-    cout << A_Star_Algorithm(&C, c) << endl;
-    cout << A_Star_Algorithm(&D, d) << endl;
-    cout << A_Star_Algorithm(&E, e) << endl;
-    cout << A_Star_Algorithm(&F, f) << endl;
-    cout << A_Star_Algorithm(&G, g) << endl;
-    cout << A_Star_Algorithm(&H, h) << endl;
-    cout << A_Star_Algorithm(&I, i) << endl;
-    cout << A_Star_Algorithm(&J, j) << endl;
+    //cout << A_Star_Algorithm(&A, a) << endl;
+    //cout << A_Star_Algorithm(&B, b) << endl;
+    //cout << A_Star_Algorithm(&C, c) << endl;
+    //cout << A_Star_Algorithm(&D, d) << endl;
+    //cout << A_Star_Algorithm(&E, e) << endl;
+    //cout << A_Star_Algorithm(&F, f) << endl;
+    //cout << A_Star_Algorithm(&G, g) << endl;
+    //cout << A_Star_Algorithm(&H, h) << endl;
+    //cout << A_Star_Algorithm(&I, i) << endl;
+    //cout << A_Star_Algorithm(&J, j) << endl;
 }
