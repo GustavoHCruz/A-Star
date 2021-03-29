@@ -5,7 +5,7 @@
 #include <assert.h>  // Assertion Library
 
 #define NIL -1
-#define heuristic_used 3 // Determines the heuristic to be used
+#define heuristic_used 1 // Determines the heuristic to be used
 
 using namespace std;
 
@@ -33,10 +33,15 @@ int heuristic_1(vector<int> state, vector<int> answer)
 {
     int counter = 0;
     for (int i = 0; i < 16; i++)
-        if (state.at(i) != answer.at(i))
+    {
+        if (state.at(i) != 0)
         {
-            counter++;
+            if (state.at(i) != answer.at(i))
+            {
+                counter++;
+            }
         }
+    }
 
     return counter;
 }
@@ -67,28 +72,28 @@ int heuristic_3(vector<int> state)
     for (size_t i = 0; i < 15; i++)
     {
         manhattamDistance = 0;
-        if (state.at(i) == 0)
-            correctPosition = 15;
-        else
-            correctPosition = ((state.at(i) - 1) * 4) % 15;
-        j = i;
-        while (correctPosition != j)
+        if (state.at(i) != 0)
         {
-            if (j < correctPosition)
+            correctPosition = ((state.at(i) - 1) * 4) % 15;
+            j = i;
+            while (correctPosition != j)
             {
-                if ((j + 4) > correctPosition)
-                    j++;
+                if (j < correctPosition)
+                {
+                    if ((j + 4) > correctPosition)
+                        j++;
+                    else
+                        j = j + 4;
+                }
                 else
-                    j = j + 4;
+                {
+                    if ((j - 4) < correctPosition)
+                        j--;
+                    else
+                        j = j - 4;
+                }
+                manhattamDistance++;
             }
-            else
-            {
-                if ((j - 4) < correctPosition)
-                    j--;
-                else
-                    j = j - 4;
-            }
-            manhattamDistance++;
         }
         counter += manhattamDistance;
     }
@@ -98,9 +103,9 @@ int heuristic_3(vector<int> state)
 // Weighted value of heuristics 1, 2 and 3
 int heuristic_4(vector<int> v, vector<int> answer)
 {
-    int w1 = 0.1, w2 = 0.3, w3 = 0.6;
+    int w1 = 0, w2 = 0, w3 = 1;
 
-    return heuristic_1(v, answer) * w1 + heuristic_2(v) * w2 + heuristic_3(v) * w3;
+    return (heuristic_1(v, answer) * w1 + heuristic_2(v) * w2 + heuristic_3(v) * w3);
 }
 
 // Maximum value between heuristics 1, 2 and 3
@@ -127,17 +132,17 @@ int heuristics(int h, vector<int> v, vector<int> answer)
 
 int findBlank(vector<int> state)
 {
-    for (size_t i = 0; i < 16; i++)
+    for (int i = 0; i < 16; i++)
         if (state.at(i) == 0)
             return i;
 
     return NIL;
 }
 
-vertex blankSwap(vector<int> state, size_t i, size_t j)
+vertex blankSwap(vector<int> state, int i, int j)
 {
     vertex ret;
-    size_t aux;
+    int aux;
     aux = state.at(i);
     state.at(i) = state.at(j);
     state.at(j) = aux;
@@ -147,75 +152,27 @@ vertex blankSwap(vector<int> state, size_t i, size_t j)
 
 vector<vertex> generateSuccessors(A_Star *tree, vertex parent)
 {
-    size_t blankPosition = findBlank(parent.state);
     vector<vertex> children;
+    int blankPosition = findBlank(parent.state), i = blankPosition % 4, j = blankPosition / 4;
 
-    if (blankPosition == 0)
-    {
-        children.push_back(blankSwap(parent.state, blankPosition, blankPosition + 4));
+    if (i < 3)
         children.push_back(blankSwap(parent.state, blankPosition, blankPosition + 1));
-    }
 
-    else if (blankPosition == 3)
-    {
+    if (i > 0)
+        children.push_back(blankSwap(parent.state, blankPosition, blankPosition - 1));
+
+    if (j < 3)
         children.push_back(blankSwap(parent.state, blankPosition, blankPosition + 4));
-        children.push_back(blankSwap(parent.state, blankPosition, blankPosition - 1));
-    }
 
-    else if (blankPosition == 12)
-    {
+    if (j > 0)
         children.push_back(blankSwap(parent.state, blankPosition, blankPosition - 4));
-        children.push_back(blankSwap(parent.state, blankPosition, blankPosition + 1));
-    }
-
-    else if (blankPosition == 15)
-    {
-        children.push_back(blankSwap(parent.state, blankPosition, blankPosition - 4));
-        children.push_back(blankSwap(parent.state, blankPosition, blankPosition - 1));
-    }
-
-    else if (blankPosition == 1 || blankPosition == 2)
-    {
-        children.push_back(blankSwap(parent.state, blankPosition, blankPosition + 1));
-        children.push_back(blankSwap(parent.state, blankPosition, blankPosition - 1));
-        children.push_back(blankSwap(parent.state, blankPosition, blankPosition + 4));
-    }
-
-    else if (blankPosition == 4 || blankPosition == 8)
-    {
-        children.push_back(blankSwap(parent.state, blankPosition, blankPosition + 1));
-        children.push_back(blankSwap(parent.state, blankPosition, blankPosition - 4));
-        children.push_back(blankSwap(parent.state, blankPosition, blankPosition + 4));
-    }
-
-    else if (blankPosition == 13 || blankPosition == 14)
-    {
-        children.push_back(blankSwap(parent.state, blankPosition, blankPosition + 1));
-        children.push_back(blankSwap(parent.state, blankPosition, blankPosition - 1));
-        children.push_back(blankSwap(parent.state, blankPosition, blankPosition - 4));
-    }
-
-    else if (blankPosition == 7 || blankPosition == 11)
-    {
-        children.push_back(blankSwap(parent.state, blankPosition, blankPosition - 1));
-        children.push_back(blankSwap(parent.state, blankPosition, blankPosition - 4));
-        children.push_back(blankSwap(parent.state, blankPosition, blankPosition + 4));
-    }
-
-    else
-    {
-        children.push_back(blankSwap(parent.state, blankPosition, blankPosition - 1));
-        children.push_back(blankSwap(parent.state, blankPosition, blankPosition + 1));
-        children.push_back(blankSwap(parent.state, blankPosition, blankPosition - 4));
-        children.push_back(blankSwap(parent.state, blankPosition, blankPosition + 4));
-    }
 
     return children;
 }
 
 bool comp(vertex x, vertex y)
 {
-    return x.f_cost < y.f_cost;
+    return x.f_cost > y.f_cost;
 }
 
 void initializeTree(A_Star *tree, vector<int> entry)
@@ -234,14 +191,17 @@ void initializeTree(A_Star *tree, vector<int> entry)
 
 int find_m(A_Star *tree, vertex m)
 {
-    int i = 0;
     for (vertex v : tree->A)
     {
         if (m.state == v.state)
-            return i;
-        i++;
+            return true;
     }
-    return NIL;
+    for (vertex v : tree->F)
+    {
+        if (m.state == v.state)
+            return true;
+    }
+    return false;
 }
 
 void find_duplicated(A_Star *tree, vertex m)
@@ -252,30 +212,29 @@ void find_duplicated(A_Star *tree, vertex m)
             if (m.g_cost < tree->A.at(i).g_cost)
             {
                 tree->A.erase(tree->A.begin() + i);
-                i--;
+                make_heap(tree->A.begin(), tree->A.end(), comp); // If removing a non-max element, heapfy must be done again
+                break;
             }
     }
 }
 
 int A_Star_Algorithm(A_Star *tree, vector<int> entry)
 {
-    int answer = 0;
+    vertex parent;
     vector<vertex> children;
-    bool end = false;
 
     initializeTree(&(*tree), entry);
 
-    if (tree->S == tree->T)
-        return 0;
-
-    while (!end)
+    while (true)
     {
-        sort_heap(tree->A.begin(), tree->A.end(), comp);
+        parent = tree->A.front();
+        pop_heap(tree->A.begin(), tree->A.end(), comp);
+        tree->A.pop_back();
 
-        vertex parent = tree->A.front();
-
-        tree->A.erase(tree->A.begin());
         tree->F.push_back(parent);
+
+        if (parent.state == tree->T)
+            return parent.f_cost;
 
         children = generateSuccessors(&(*tree), parent);
 
@@ -283,27 +242,20 @@ int A_Star_Algorithm(A_Star *tree, vector<int> entry)
         {
             m.g_cost = parent.g_cost + 1;
 
-            find_duplicated(&(*tree), m);
+            find_duplicated(&(*tree), m); // If removing a non-max element, heapfy must be done again
 
-            if (find_m(&(*tree), m) == NIL)
+            if (find_m(&(*tree), m) == false)
             {
                 m.parent = parent.name;
                 m.name = tree->currentStateIndex++;
                 m.h_cost = heuristics(heuristic_used, m.state, tree->T);
                 m.f_cost = m.g_cost + m.h_cost;
                 tree->A.push_back(m);
+                push_heap(tree->A.begin(), tree->A.end(), comp);
             }
         }
-
-        for (int i = tree->A.size() - 1; i > tree->A.size() - children.size() - 1; i--)
-            if (tree->A.at(i).state == tree->T)
-            {
-                end = true;
-                answer = tree->A.at(i).f_cost;
-            }
     }
-
-    return answer;
+    return NIL;
 }
 
 vector<int> split(string entry, char separator)
@@ -334,22 +286,37 @@ int main()
     */
 
     // Tests
-    A_Star A, B, C, D, E, F, G, H;
-    vector<int> a = {1, 5, 9, 13, 2, 10, 7, 14, 3, 6, 11, 15, 4, 8, 12, 0}; // = 8
-    vector<int> b = {1, 5, 9, 13, 3, 2, 10, 14, 6, 7, 11, 15, 4, 8, 12, 0}; // = 10
-    vector<int> c = {2, 1, 10, 9, 3, 5, 11, 13, 4, 6, 12, 14, 0, 7, 8, 15}; // = 15
-    vector<int> d = {0, 2, 1, 9, 3, 5, 6, 13, 4, 7, 10, 14, 8, 12, 15, 11}; // = 18
-    vector<int> e = {3, 2, 1, 5, 4, 7, 6, 10, 8, 11, 0, 9, 12, 15, 14, 13}; // = 30
-    vector<int> f = {0, 5, 9, 13, 2, 10, 15, 14, 1, 4, 3, 6, 8, 11, 12, 7}; // = ?
-    vector<int> g = {9, 0, 13, 10, 5, 2, 6, 14, 1, 11, 15, 12, 7, 3, 4, 8}; // = 25
-    vector<int> h = {15, 9, 0, 7, 13, 1, 11, 14, 5, 4, 10, 2, 3, 8, 6, 12}; // = ?
+    A_Star A, B, C, D, E, F, G, H, I, J;
+    vector<int> a = {1, 5, 9, 13, 2, 10, 7, 14, 3, 6, 11, 15, 4, 8, 12, 0}; // = 8  (Run.Codes 1)
+    vector<int> b = {1, 5, 9, 13, 3, 2, 10, 14, 6, 7, 11, 15, 4, 8, 12, 0}; // = 10 (Run.Codes 2)
+    vector<int> c = {2, 1, 10, 9, 3, 5, 11, 13, 4, 6, 12, 14, 0, 7, 8, 15}; // = 15 (Run.Codes 3)
+    vector<int> d = {0, 2, 1, 9, 3, 5, 6, 13, 4, 7, 10, 14, 8, 12, 15, 11}; // = 18 (Run.Codes 4)
+    vector<int> e = {3, 2, 1, 5, 4, 7, 6, 10, 8, 11, 0, 9, 12, 15, 14, 13}; // = 30 (Classroom 1)
+    vector<int> f = {0, 5, 9, 13, 2, 10, 15, 14, 1, 4, 3, 6, 8, 11, 12, 7}; // = 30 (Classroom 2)
+    vector<int> g = {9, 0, 13, 10, 5, 2, 6, 14, 1, 11, 15, 12, 7, 3, 4, 8}; // = 25 (Classroom 3)
+    vector<int> h = {15, 9, 0, 7, 13, 1, 11, 14, 5, 4, 10, 2, 3, 8, 6, 12}; // = 46 (Classroom 4)
+    vector<int> i = {5, 13, 6, 10, 1, 7, 2, 9, 4, 3, 15, 14, 8, 0, 11, 12}; // = 20 (Extra 1)
+    vector<int> j = {2, 10, 11, 9, 3, 1, 0, 13, 4, 6, 7, 14, 5, 8, 12, 15}; // = 27 (Extra 2)
 
-    assert(A_Star_Algorithm(&A, a) == 8);
-    assert(A_Star_Algorithm(&B, b) == 10);
-    assert(A_Star_Algorithm(&C, c) == 15);
-    assert(A_Star_Algorithm(&D, d) == 18);
-    assert(A_Star_Algorithm(&E, e) == 30);
-    cout << (A_Star_Algorithm(&F, f)) << endl;
-    assert(A_Star_Algorithm(&G, g) == 25);
-    cout << (A_Star_Algorithm(&H, h)) << endl;
+    //assert(A_Star_Algorithm(&A, a) == 8);
+    //assert(A_Star_Algorithm(&B, b) == 10);
+    //assert(A_Star_Algorithm(&C, c) == 15);
+    //assert(A_Star_Algorithm(&D, d) == 18);
+    //assert(A_Star_Algorithm(&E, e) == 30);
+    //assert(A_Star_Algorithm(&F, f) == 30);
+    //assert(A_Star_Algorithm(&G, g) == 25);
+    //assert(A_Star_Algorithm(&H, h) == 46);
+    //assert(A_Star_Algorithm(&I, i) == 20);
+    //assert(A_Star_Algorithm(&J, j) == 27);
+
+    cout << A_Star_Algorithm(&A, a) << endl;
+    cout << A_Star_Algorithm(&B, b) << endl;
+    cout << A_Star_Algorithm(&C, c) << endl;
+    cout << A_Star_Algorithm(&D, d) << endl;
+    cout << A_Star_Algorithm(&E, e) << endl;
+    cout << A_Star_Algorithm(&F, f) << endl;
+    cout << A_Star_Algorithm(&G, g) << endl;
+    cout << A_Star_Algorithm(&H, h) << endl;
+    cout << A_Star_Algorithm(&I, i) << endl;
+    cout << A_Star_Algorithm(&J, j) << endl;
 }
