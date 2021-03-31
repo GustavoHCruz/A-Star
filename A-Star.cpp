@@ -29,13 +29,12 @@ struct A_Star
 };
 
 // Number of out-of-order pieces
-int heuristic_1(vector<int> state, vector<int> answer)
+int heuristic_1(vector<int> state)
 {
     int counter = 0;
-    for (int i = 0; i < 16; i++)
-        if (state.at(i) != 0)
-            if (state.at(i) != answer.at(i))
-                counter++;
+    for (int i = 0; i < 15; i++)
+        if ((state.at(i) - 1) != (i*4)%15)
+            counter++;
 
     return counter;
 }
@@ -95,32 +94,32 @@ int heuristic_3(vector<int> state)
 }
 
 // Weighted value of heuristics 1, 2 and 3
-int heuristic_4(vector<int> v, vector<int> answer)
+int heuristic_4(vector<int> v)
 {
     int w1 = 0, w2 = 0, w3 = 1;
 
-    return (heuristic_1(v, answer) * w1 + heuristic_2(v) * w2 + heuristic_3(v) * w3);
+    return (heuristic_1(v) * w1 + heuristic_2(v) * w2 + heuristic_3(v) * w3);
 }
 
 // Maximum value between heuristics 1, 2 and 3
-int heuristic_5(vector<int> v, vector<int> answer)
+int heuristic_5(vector<int> v)
 {
-    return max({heuristic_1(v, answer), heuristic_2(v), heuristic_3(v)});
+    return max({heuristic_1(v), heuristic_2(v), heuristic_3(v)});
 }
 
 // Determines which heuristic will be used
-int heuristics(int h, vector<int> v, vector<int> answer)
+int heuristics(int h, vector<int> v)
 {
     if (h == 1)
-        return heuristic_1(v, answer);
+        return heuristic_1(v);
     else if (h == 2)
         return heuristic_2(v);
     else if (h == 3)
         return heuristic_3(v);
     else if (h == 4)
-        return heuristic_4(v, answer);
+        return heuristic_4(v);
     else if (h == 5)
-        return heuristic_5(v, answer);
+        return heuristic_5(v);
     return NIL;
 }
 
@@ -173,7 +172,7 @@ void initializeTree(A_Star *tree, vector<int> entry)
 {
     vertex root;
     root.g_cost = 0;
-    root.h_cost = heuristics(heuristic_used, entry, tree->T);
+    root.h_cost = heuristics(heuristic_used, entry);
     root.f_cost = root.g_cost + root.h_cost;
     root.name = tree->currentStateIndex++;
     root.parent = NIL;
@@ -220,7 +219,7 @@ int A_Star_Algorithm(A_Star *tree, vector<int> entry)
     initializeTree(&(*tree), entry);
 
     while (true)
-    {
+    {        
         parent = tree->A.front();
         pop_heap(tree->A.begin(), tree->A.end(), comp);
         tree->A.pop_back();
@@ -242,7 +241,7 @@ int A_Star_Algorithm(A_Star *tree, vector<int> entry)
             {
                 m.parent = parent.name;
                 m.name = tree->currentStateIndex++;
-                m.h_cost = heuristics(heuristic_used, m.state, tree->T);
+                m.h_cost = heuristics(heuristic_used, m.state);
                 m.f_cost = m.g_cost + m.h_cost;
                 tree->A.push_back(m);
                 push_heap(tree->A.begin(), tree->A.end(), comp);
@@ -292,25 +291,25 @@ int main()
     vector<int> i = {5, 13, 6, 10, 1, 7, 2, 9, 4, 3, 15, 14, 8, 0, 11, 12}; // = 20 (Extra 1)
     vector<int> j = {2, 10, 11, 9, 3, 1, 0, 13, 4, 6, 7, 14, 5, 8, 12, 15}; // = 27 (Extra 2)
 
-    assert(A_Star_Algorithm(&A, a) == 8);
-    assert(A_Star_Algorithm(&B, b) == 10);
-    assert(A_Star_Algorithm(&C, c) == 15);
-    assert(A_Star_Algorithm(&D, d) == 18);
-    assert(A_Star_Algorithm(&E, e) == 30);
-    assert(A_Star_Algorithm(&F, f) == 30);
-    assert(A_Star_Algorithm(&G, g) == 25);
-    assert(A_Star_Algorithm(&H, h) == 46);
-    assert(A_Star_Algorithm(&I, i) == 20);
-    assert(A_Star_Algorithm(&J, j) == 27);
+    //assert(A_Star_Algorithm(&A, a) == 8);
+    //assert(A_Star_Algorithm(&B, b) == 10);
+    //assert(A_Star_Algorithm(&C, c) == 15);
+    //assert(A_Star_Algorithm(&D, d) == 18);
+    //assert(A_Star_Algorithm(&E, e) == 30);
+    //assert(A_Star_Algorithm(&F, f) == 30);
+    //assert(A_Star_Algorithm(&G, g) == 25);
+    //assert(A_Star_Algorithm(&H, h) == 46);
+    //assert(A_Star_Algorithm(&I, i) == 20);
+    //assert(A_Star_Algorithm(&J, j) == 27);
 
-    //cout << A_Star_Algorithm(&A, a) << endl;
-    //cout << A_Star_Algorithm(&B, b) << endl;
-    //cout << A_Star_Algorithm(&C, c) << endl;
-    //cout << A_Star_Algorithm(&D, d) << endl;
-    //cout << A_Star_Algorithm(&E, e) << endl;
-    //cout << A_Star_Algorithm(&F, f) << endl;
-    //cout << A_Star_Algorithm(&G, g) << endl;
-    //cout << A_Star_Algorithm(&H, h) << endl;
-    //cout << A_Star_Algorithm(&I, i) << endl;
-    //cout << A_Star_Algorithm(&J, j) << endl;
+    cout << A_Star_Algorithm(&A, a) << endl;
+    cout << A_Star_Algorithm(&B, b) << endl;
+    cout << A_Star_Algorithm(&C, c) << endl;
+    cout << A_Star_Algorithm(&D, d) << endl;
+    cout << A_Star_Algorithm(&E, e) << endl;
+    cout << A_Star_Algorithm(&F, f) << endl;
+    cout << A_Star_Algorithm(&G, g) << endl;
+    cout << A_Star_Algorithm(&H, h) << endl;
+    cout << A_Star_Algorithm(&I, i) << endl;
+    cout << A_Star_Algorithm(&J, j) << endl;
 }
