@@ -13,7 +13,7 @@ using namespace std;
 struct vertex
 {
     int name;
-    vector<int> state;
+    vector<short> state;
     int parent;
     int g_cost;
     int h_cost;
@@ -22,15 +22,15 @@ struct vertex
 
 struct A_Star
 {
-    vector<int> S;                                                          // Entry
-    vector<vertex> A;                                                       // Open set
-    vector<vertex> F;                                                       // Closed set
-    int currentStateIndex = 0;                                              // Name index
-    vector<int> T = {1, 5, 9, 13, 2, 6, 10, 14, 3, 7, 11, 15, 4, 8, 12, 0}; // Final state set
+    vector<short> S;                                                          // Entry
+    vector<vertex> A;                                                         // Open set
+    vector<vertex> F;                                                         // Closed set
+    int currentStateIndex = 0;                                                // Name index
+    vector<short> T = {1, 5, 9, 13, 2, 6, 10, 14, 3, 7, 11, 15, 4, 8, 12, 0}; // Final state set
 };
 
 // Number of out-of-order pieces
-int heuristic_1(vector<int> state)
+int heuristic_1(vector<short> state)
 {
     int counter = 0;
     for (int i = 0; i < 15; i++)
@@ -41,14 +41,14 @@ int heuristic_1(vector<int> state)
 }
 
 // Number of pieces out of numerical order
-int heuristic_2(vector<int> state)
+int heuristic_2(vector<short> state)
 {
     int counter = 0, comp;
     int number = state.at(0), i;
     for (i = 1; i < 15; i++)
     {
         comp = state.at((i * 4) % 15);
-        if ((number + 1) != comp && number != 0)
+        if ((number + 1) != comp)
             counter++;
         number = state.at((i * 4) % 15);
     }
@@ -60,7 +60,7 @@ int heuristic_2(vector<int> state)
 }
 
 // Manhattan distance for each piece out of place
-int heuristic_3(vector<int> state)
+int heuristic_3(vector<short> state)
 {
     int counter = 0, manhattamDistance, j, correctPosition;
     for (size_t i = 0; i < 15; i++)
@@ -95,7 +95,7 @@ int heuristic_3(vector<int> state)
 }
 
 // Weighted value of heuristics 1, 2 and 3
-int heuristic_4(vector<int> v)
+int heuristic_4(vector<short> v)
 {
     int w1 = 0, w2 = 0, w3 = 1;
 
@@ -103,13 +103,13 @@ int heuristic_4(vector<int> v)
 }
 
 // Maximum value between heuristics 1, 2 and 3
-int heuristic_5(vector<int> v)
+int heuristic_5(vector<short> v)
 {
     return max({heuristic_1(v), heuristic_2(v), heuristic_3(v)});
 }
 
 // Determines which heuristic will be used
-int heuristics(int h, vector<int> v)
+int heuristics(int h, vector<short> v)
 {
     if (h == 1)
         return heuristic_1(v);
@@ -124,7 +124,7 @@ int heuristics(int h, vector<int> v)
     return NIL;
 }
 
-int findBlank(vector<int> state)
+int findBlank(vector<short> state)
 {
     for (int i = 0; i < 16; i++)
         if (state.at(i) == 0)
@@ -133,7 +133,7 @@ int findBlank(vector<int> state)
     return NIL;
 }
 
-vertex blankSwap(vector<int> state, int i, int j)
+vertex blankSwap(vector<short> state, int i, int j)
 {
     vertex ret;
     int aux;
@@ -169,7 +169,7 @@ bool comp(vertex x, vertex y)
     return x.f_cost > y.f_cost;
 }
 
-void initializeTree(A_Star *tree, vector<int> entry, map<vector<int>, int> &treeMap)
+void initializeTree(A_Star *tree, vector<short> entry, map<vector<short>, int> &treeMap)
 {
     vertex root;
     root.g_cost = 0;
@@ -185,37 +185,26 @@ void initializeTree(A_Star *tree, vector<int> entry, map<vector<int>, int> &tree
     treeMap[root.state] = root.g_cost;
 }
 
-bool find_m(A_Star *tree, vertex m, map<vector<int>, int> &treeMap)
+bool find_m(A_Star *tree, vertex m, map<vector<short>, int> &treeMap)
 {
     if (treeMap.find(m.state) != treeMap.end())
         return true;
     return false;
 }
 
-void find_duplicated(A_Star *tree, vertex m, map<vector<int>, int> &treeMap)
+void find_duplicated(A_Star *tree, vertex m, map<vector<short>, int> &treeMap)
 {
     if (treeMap.find(m.state) != treeMap.end())
     {
         if (m.g_cost < treeMap[m.state])
             treeMap.erase(m.state);
     }
-
-    //for (int i = 0; i < tree->A.size(); i++)
-    //{
-    //    if (m.state == tree->A.at(i).state)
-    //        if (m.g_cost < tree->A.at(i).g_cost)
-    //        {
-    //            tree->A.erase(tree->A.begin() + i);
-    //            make_heap(tree->A.begin(), tree->A.end(), comp); // If removing a non-max element, heapfy must be done again
-    //            break;
-    //        }
-    //}
 }
 
-int A_Star_Algorithm(vector<int> entry)
+int A_Star_Algorithm(vector<short> entry)
 {
     A_Star tree;
-    map<vector<int>, int> treeMap; // Hash
+    map<vector<short>, int> treeMap; // Hash
     vertex parent;
     vector<vertex> children;
 
@@ -284,36 +273,26 @@ int main()
     */
 
     // Tests
-    vector<int> a = {1, 5, 9, 13, 2, 10, 7, 14, 3, 6, 11, 15, 4, 8, 12, 0}; // = 8  (Run.Codes 1)
-    vector<int> b = {1, 5, 9, 13, 3, 2, 10, 14, 6, 7, 11, 15, 4, 8, 12, 0}; // = 10 (Run.Codes 2)
-    vector<int> c = {2, 1, 10, 9, 3, 5, 11, 13, 4, 6, 12, 14, 0, 7, 8, 15}; // = 15 (Run.Codes 3)
-    vector<int> d = {0, 2, 1, 9, 3, 5, 6, 13, 4, 7, 10, 14, 8, 12, 15, 11}; // = 18 (Run.Codes 4)
-    vector<int> e = {3, 2, 1, 5, 4, 7, 6, 10, 8, 11, 0, 9, 12, 15, 14, 13}; // = 30 (Classroom 1)
-    vector<int> f = {0, 5, 9, 13, 2, 10, 15, 14, 1, 4, 3, 6, 8, 11, 12, 7}; // = 30 (Classroom 2)
-    vector<int> g = {9, 0, 13, 10, 5, 2, 6, 14, 1, 11, 15, 12, 7, 3, 4, 8}; // = 25 (Classroom 3)
-    vector<int> h = {15, 9, 0, 7, 13, 1, 11, 14, 5, 4, 10, 2, 3, 8, 6, 12}; // = 46 (Classroom 4)
-    vector<int> i = {5, 13, 6, 10, 1, 7, 2, 9, 4, 3, 15, 14, 8, 0, 11, 12}; // = 20 (Extra 1)
-    vector<int> j = {2, 10, 11, 9, 3, 1, 0, 13, 4, 6, 7, 14, 5, 8, 12, 15}; // = 27 (Extra 2)
-
-    //assert(A_Star_Algorithm(a) == 8);
-    //assert(A_Star_Algorithm(b) == 10);
-    //assert(A_Star_Algorithm(c) == 15);
-    //assert(A_Star_Algorithm(d) == 18);
-    //assert(A_Star_Algorithm(e) == 30);
-    //assert(A_Star_Algorithm(f) == 30);
-    //assert(A_Star_Algorithm(g) == 25);
-    //assert(A_Star_Algorithm(h) == 46);
-    //assert(A_Star_Algorithm(i) == 20);
-    //assert(A_Star_Algorithm(j) == 27);
-
-    cout << A_Star_Algorithm(a) << endl;
-    cout << A_Star_Algorithm(b) << endl;
-    cout << A_Star_Algorithm(c) << endl;
-    cout << A_Star_Algorithm(d) << endl;
-    cout << A_Star_Algorithm(e) << endl;
-    cout << A_Star_Algorithm(f) << endl;
-    cout << A_Star_Algorithm(g) << endl;
-    cout << A_Star_Algorithm(h) << endl;
-    cout << A_Star_Algorithm(i) << endl;
-    cout << A_Star_Algorithm(j) << endl;
+    /*
+    assert(A_Star_Algorithm({1, 5, 9, 13, 2, 10, 7, 14, 3, 6, 11, 15, 4, 8, 12, 0}) == 8); // (Run.Codes 1)
+    assert(A_Star_Algorithm({1, 5, 9, 13, 3, 2, 10, 14, 6, 7, 11, 15, 4, 8, 12, 0}) == 10); //  (Run.Codes 2)
+    assert(A_Star_Algorithm({2, 1, 10, 9, 3, 5, 11, 13, 4, 6, 12, 14, 0, 7, 8, 15}) == 15); //  (Run.Codes 3)
+    assert(A_Star_Algorithm({0, 2, 1, 9, 3, 5, 6, 13, 4, 7, 10, 14, 8, 12, 15, 11}) == 18); //  (Run.Codes 4)
+    assert(A_Star_Algorithm({3, 2, 1, 5, 4, 7, 6, 10, 8, 11, 0, 9, 12, 15, 14, 13}) == 30); //  (Classroom 1)
+    assert(A_Star_Algorithm({0, 5, 9, 13, 2, 10, 15, 14, 1, 4, 3, 6, 8, 11, 12, 7}) == 30); //  (Classroom 2)
+    assert(A_Star_Algorithm({9, 0, 13, 10, 5, 2, 6, 14, 1, 11, 15, 12, 7, 3, 4, 8}) == 25); //  (Classroom 3)
+    assert(A_Star_Algorithm({15, 9, 0, 7, 13, 1, 11, 14, 5, 4, 10, 2, 3, 8, 6, 12}) == 46); //  (Classroom 4)
+    assert(A_Star_Algorithm({5, 13, 6, 10, 1, 7, 2, 9, 4, 3, 15, 14, 8, 0, 11, 12}) == 20); //  (Extra 1)
+    assert(A_Star_Algorithm({2, 10, 11, 9, 3, 1, 0, 13, 4, 6, 7, 14, 5, 8, 12, 15}) == 27); //  (Extra 2)
+    assert(A_Star_Algorithm({0,2,9,13,3,1,5,14,4,7,6,10,8,11,12,15}) == 18); // (Final 1)
+    assert(A_Star_Algorithm({3,2,1,9,0,5,6,13,4,7,10,14,8,12,15,11}) == 19); // (Final 2)
+    assert(A_Star_Algorithm({2,1,9,13,3,5,10,14,4,6,11,15,7,8,12,0}) == 12); // (Final 3)
+    assert(A_Star_Algorithm({9,13,10,0,5,2,6,14,1,7,11,15,3,4,8,12}) == 21); // (Final 4)
+    assert(A_Star_Algorithm({4,3,2,1,8,10,11,5,12,6,0,9,15,7,14,13}) == 38); // (Final 5)
+    assert(A_Star_Algorithm({9,13,14,15,5,6,10,8,0,1,11,12,7,2,3,4}) == 32); // (Final 6)
+    assert(A_Star_Algorithm({10,6,2,1,7,13,9,5,0,15,14,12,11,3,4,8}) == 38); // (Final 7)
+    assert(A_Star_Algorithm({6,2,1,5,4,10,13,9,0,8,3,7,12,15,11,14}) == 32); // (Final 8)
+    assert(A_Star_Algorithm({10,13,15,0,5,9,14,11,1,2,6,7,3,4,8,12}) == 27); // (Final 9)
+    assert(A_Star_Algorithm({5,9,13,14,1,6,7,10,11,15,12,0,8,2,3,4}) == 29); // (Final 10)
+    */
 }
