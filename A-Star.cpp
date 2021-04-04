@@ -3,6 +3,7 @@
 #include <algorithm> // Heap Structure
 #include <string>    // String Structure
 #include <assert.h>  // Assertion Library
+#include <map>       // Map Library
 
 #define NIL -1
 #define heuristic_used 3 // Determines the heuristic to be used
@@ -33,7 +34,7 @@ int heuristic_1(vector<int> state)
 {
     int counter = 0;
     for (int i = 0; i < 15; i++)
-        if ((state.at(i) - 1) != (i*4)%15)
+        if ((state.at(i) - 1) != (i * 4) % 15)
             counter++;
 
     return counter;
@@ -168,7 +169,7 @@ bool comp(vertex x, vertex y)
     return x.f_cost > y.f_cost;
 }
 
-void initializeTree(A_Star *tree, vector<int> entry)
+void initializeTree(A_Star *tree, vector<int> entry, map<vector<int>, int> &treeMap)
 {
     vertex root;
     root.g_cost = 0;
@@ -180,71 +181,75 @@ void initializeTree(A_Star *tree, vector<int> entry)
     tree->S = entry;
     tree->A.push_back(root);
     make_heap(tree->A.begin(), tree->A.end(), comp);
+
+    treeMap[root.state] = root.g_cost;
 }
 
-int find_m(A_Star *tree, vertex m)
+bool find_m(A_Star *tree, vertex m, map<vector<int>, int> &treeMap)
 {
-    for (vertex v : tree->A)
-    {
-        if (m.state == v.state)
-            return true;
-    }
-    for (vertex v : tree->F)
-    {
-        if (m.state == v.state)
-            return true;
-    }
+    if (treeMap.find(m.state) != treeMap.end())
+        return true;
     return false;
 }
 
-void find_duplicated(A_Star *tree, vertex m)
+void find_duplicated(A_Star *tree, vertex m, map<vector<int>, int> &treeMap)
 {
-    for (int i = 0; i < tree->A.size(); i++)
+    if (treeMap.find(m.state) != treeMap.end())
     {
-        if (m.state == tree->A.at(i).state)
-            if (m.g_cost < tree->A.at(i).g_cost)
-            {
-                tree->A.erase(tree->A.begin() + i);
-                make_heap(tree->A.begin(), tree->A.end(), comp); // If removing a non-max element, heapfy must be done again
-                break;
-            }
+        if (m.g_cost < treeMap[m.state])
+            treeMap.erase(m.state);
     }
+
+    //for (int i = 0; i < tree->A.size(); i++)
+    //{
+    //    if (m.state == tree->A.at(i).state)
+    //        if (m.g_cost < tree->A.at(i).g_cost)
+    //        {
+    //            tree->A.erase(tree->A.begin() + i);
+    //            make_heap(tree->A.begin(), tree->A.end(), comp); // If removing a non-max element, heapfy must be done again
+    //            break;
+    //        }
+    //}
 }
 
-int A_Star_Algorithm(A_Star *tree, vector<int> entry)
+int A_Star_Algorithm(vector<int> entry)
 {
+    A_Star tree;
+    map<vector<int>, int> treeMap; // Hash
     vertex parent;
     vector<vertex> children;
 
-    initializeTree(&(*tree), entry);
+    initializeTree(&tree, entry, treeMap);
 
+    int counter = 0;
     while (true)
-    {        
-        parent = tree->A.front();
-        pop_heap(tree->A.begin(), tree->A.end(), comp);
-        tree->A.pop_back();
+    {
+        parent = tree.A.front();
+        pop_heap(tree.A.begin(), tree.A.end(), comp);
+        tree.A.pop_back();
 
-        tree->F.push_back(parent);
+        tree.F.push_back(parent);
 
-        if (parent.state == tree->T)
+        if (parent.state == tree.T)
             return parent.f_cost;
 
-        children = generateSuccessors(&(*tree), parent);
+        children = generateSuccessors(&tree, parent);
 
         for (vertex m : children)
         {
             m.g_cost = parent.g_cost + 1;
 
-            find_duplicated(&(*tree), m); // If removing a non-max element, heapfy must be done again
+            find_duplicated(&tree, m, treeMap);
 
-            if (find_m(&(*tree), m) == false)
+            if (find_m(&tree, m, treeMap) == false)
             {
                 m.parent = parent.name;
-                m.name = tree->currentStateIndex++;
+                m.name = tree.currentStateIndex++;
                 m.h_cost = heuristics(heuristic_used, m.state);
                 m.f_cost = m.g_cost + m.h_cost;
-                tree->A.push_back(m);
-                push_heap(tree->A.begin(), tree->A.end(), comp);
+                tree.A.push_back(m);
+                treeMap[m.state] = m.g_cost;
+                push_heap(tree.A.begin(), tree.A.end(), comp);
             }
         }
     }
@@ -279,7 +284,6 @@ int main()
     */
 
     // Tests
-    A_Star A, B, C, D, E, F, G, H, I, J;
     vector<int> a = {1, 5, 9, 13, 2, 10, 7, 14, 3, 6, 11, 15, 4, 8, 12, 0}; // = 8  (Run.Codes 1)
     vector<int> b = {1, 5, 9, 13, 3, 2, 10, 14, 6, 7, 11, 15, 4, 8, 12, 0}; // = 10 (Run.Codes 2)
     vector<int> c = {2, 1, 10, 9, 3, 5, 11, 13, 4, 6, 12, 14, 0, 7, 8, 15}; // = 15 (Run.Codes 3)
@@ -291,25 +295,25 @@ int main()
     vector<int> i = {5, 13, 6, 10, 1, 7, 2, 9, 4, 3, 15, 14, 8, 0, 11, 12}; // = 20 (Extra 1)
     vector<int> j = {2, 10, 11, 9, 3, 1, 0, 13, 4, 6, 7, 14, 5, 8, 12, 15}; // = 27 (Extra 2)
 
-    //assert(A_Star_Algorithm(&A, a) == 8);
-    //assert(A_Star_Algorithm(&B, b) == 10);
-    //assert(A_Star_Algorithm(&C, c) == 15);
-    //assert(A_Star_Algorithm(&D, d) == 18);
-    //assert(A_Star_Algorithm(&E, e) == 30);
-    //assert(A_Star_Algorithm(&F, f) == 30);
-    //assert(A_Star_Algorithm(&G, g) == 25);
-    //assert(A_Star_Algorithm(&H, h) == 46);
-    //assert(A_Star_Algorithm(&I, i) == 20);
-    //assert(A_Star_Algorithm(&J, j) == 27);
+    //assert(A_Star_Algorithm(a) == 8);
+    //assert(A_Star_Algorithm(b) == 10);
+    //assert(A_Star_Algorithm(c) == 15);
+    //assert(A_Star_Algorithm(d) == 18);
+    //assert(A_Star_Algorithm(e) == 30);
+    //assert(A_Star_Algorithm(f) == 30);
+    //assert(A_Star_Algorithm(g) == 25);
+    //assert(A_Star_Algorithm(h) == 46);
+    //assert(A_Star_Algorithm(i) == 20);
+    //assert(A_Star_Algorithm(j) == 27);
 
-    cout << A_Star_Algorithm(&A, a) << endl;
-    cout << A_Star_Algorithm(&B, b) << endl;
-    cout << A_Star_Algorithm(&C, c) << endl;
-    cout << A_Star_Algorithm(&D, d) << endl;
-    cout << A_Star_Algorithm(&E, e) << endl;
-    cout << A_Star_Algorithm(&F, f) << endl;
-    cout << A_Star_Algorithm(&G, g) << endl;
-    cout << A_Star_Algorithm(&H, h) << endl;
-    cout << A_Star_Algorithm(&I, i) << endl;
-    cout << A_Star_Algorithm(&J, j) << endl;
+    cout << A_Star_Algorithm(a) << endl;
+    cout << A_Star_Algorithm(b) << endl;
+    cout << A_Star_Algorithm(c) << endl;
+    cout << A_Star_Algorithm(d) << endl;
+    cout << A_Star_Algorithm(e) << endl;
+    cout << A_Star_Algorithm(f) << endl;
+    cout << A_Star_Algorithm(g) << endl;
+    cout << A_Star_Algorithm(h) << endl;
+    cout << A_Star_Algorithm(i) << endl;
+    cout << A_Star_Algorithm(j) << endl;
 }
