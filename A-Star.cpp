@@ -210,7 +210,6 @@ int A_Star_Algorithm(vector<short> entry)
 
     initializeTree(&tree, entry, treeMap);
 
-    int counter = 0;
     while (true)
     {
         parent = tree.A.front();
@@ -245,10 +244,10 @@ int A_Star_Algorithm(vector<short> entry)
     return NIL;
 }
 
-vector<int> split(string entry, char separator)
+vector<short> split(string entry, char separator)
 {
     size_t start = 0, end = 0;
-    vector<int> result;
+    vector<short> result;
 
     while ((end = entry.find(separator, start)) != string::npos)
     {
@@ -263,13 +262,12 @@ int main()
 {
     // Normal Execution
     /*
-    A_Star tree;
     string in;
     getline(cin, in);
     while (in.at(0) == ' ')
         in.erase(0, 1);
-    vector<int> entry = split(in, ' ');
-    cout << A_Star_Algorithm(&tree, entry);
+    vector<short> entry = split(in, ' ');
+    cout << A_Star_Algorithm(entry);
     */
 
     // Tests
