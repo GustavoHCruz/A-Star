@@ -97,8 +97,7 @@ int heuristic_3(vector<short> state)
 // Weighted value of heuristics 1, 2 and 3
 int heuristic_4(vector<short> v)
 {
-    int w1 = 0, w2 = 0, w3 = 1;
-
+    float w1 = 0.15, w2 = 0.05, w3 = 0.80;
     return (heuristic_1(v) * w1 + heuristic_2(v) * w2 + heuristic_3(v) * w3);
 }
 
@@ -272,25 +271,25 @@ int main()
 
     // Tests
     /*
-    assert(A_Star_Algorithm({1, 5, 9, 13, 2, 10, 7, 14, 3, 6, 11, 15, 4, 8, 12, 0}) == 8); // (Run.Codes 1)
-    assert(A_Star_Algorithm({1, 5, 9, 13, 3, 2, 10, 14, 6, 7, 11, 15, 4, 8, 12, 0}) == 10); //  (Run.Codes 2)
-    assert(A_Star_Algorithm({2, 1, 10, 9, 3, 5, 11, 13, 4, 6, 12, 14, 0, 7, 8, 15}) == 15); //  (Run.Codes 3)
-    assert(A_Star_Algorithm({0, 2, 1, 9, 3, 5, 6, 13, 4, 7, 10, 14, 8, 12, 15, 11}) == 18); //  (Run.Codes 4)
-    assert(A_Star_Algorithm({3, 2, 1, 5, 4, 7, 6, 10, 8, 11, 0, 9, 12, 15, 14, 13}) == 30); //  (Classroom 1)
-    assert(A_Star_Algorithm({0, 5, 9, 13, 2, 10, 15, 14, 1, 4, 3, 6, 8, 11, 12, 7}) == 30); //  (Classroom 2)
-    assert(A_Star_Algorithm({9, 0, 13, 10, 5, 2, 6, 14, 1, 11, 15, 12, 7, 3, 4, 8}) == 25); //  (Classroom 3)
-    assert(A_Star_Algorithm({15, 9, 0, 7, 13, 1, 11, 14, 5, 4, 10, 2, 3, 8, 6, 12}) == 46); //  (Classroom 4)
-    assert(A_Star_Algorithm({5, 13, 6, 10, 1, 7, 2, 9, 4, 3, 15, 14, 8, 0, 11, 12}) == 20); //  (Extra 1)
-    assert(A_Star_Algorithm({2, 10, 11, 9, 3, 1, 0, 13, 4, 6, 7, 14, 5, 8, 12, 15}) == 27); //  (Extra 2)
-    assert(A_Star_Algorithm({0,2,9,13,3,1,5,14,4,7,6,10,8,11,12,15}) == 18); // (Final 1)
-    assert(A_Star_Algorithm({3,2,1,9,0,5,6,13,4,7,10,14,8,12,15,11}) == 19); // (Final 2)
-    assert(A_Star_Algorithm({2,1,9,13,3,5,10,14,4,6,11,15,7,8,12,0}) == 12); // (Final 3)
-    assert(A_Star_Algorithm({9,13,10,0,5,2,6,14,1,7,11,15,3,4,8,12}) == 21); // (Final 4)
-    assert(A_Star_Algorithm({4,3,2,1,8,10,11,5,12,6,0,9,15,7,14,13}) == 38); // (Final 5)
-    assert(A_Star_Algorithm({9,13,14,15,5,6,10,8,0,1,11,12,7,2,3,4}) == 32); // (Final 6)
-    assert(A_Star_Algorithm({10,6,2,1,7,13,9,5,0,15,14,12,11,3,4,8}) == 38); // (Final 7)
-    assert(A_Star_Algorithm({6,2,1,5,4,10,13,9,0,8,3,7,12,15,11,14}) == 32); // (Final 8)
-    assert(A_Star_Algorithm({10,13,15,0,5,9,14,11,1,2,6,7,3,4,8,12}) == 27); // (Final 9)
-    assert(A_Star_Algorithm({5,9,13,14,1,6,7,10,11,15,12,0,8,2,3,4}) == 29); // (Final 10)
+    assert(A_Star_Algorithm({1, 5, 9, 13, 2, 10, 7, 14, 3, 6, 11, 15, 4, 8, 12, 0}) == 8);  // (Run.Codes 1)
+    assert(A_Star_Algorithm({1, 5, 9, 13, 3, 2, 10, 14, 6, 7, 11, 15, 4, 8, 12, 0}) == 10); // (Run.Codes 2)
+    assert(A_Star_Algorithm({2, 1, 10, 9, 3, 5, 11, 13, 4, 6, 12, 14, 0, 7, 8, 15}) == 15); // (Run.Codes 3)
+    assert(A_Star_Algorithm({0, 2, 1, 9, 3, 5, 6, 13, 4, 7, 10, 14, 8, 12, 15, 11}) == 18); // (Run.Codes 4)
+    assert(A_Star_Algorithm({3, 2, 1, 5, 4, 7, 6, 10, 8, 11, 0, 9, 12, 15, 14, 13}) == 30); // (Classroom 1)
+    assert(A_Star_Algorithm({0, 5, 9, 13, 2, 10, 15, 14, 1, 4, 3, 6, 8, 11, 12, 7}) == 30); // (Classroom 2)
+    assert(A_Star_Algorithm({9, 0, 13, 10, 5, 2, 6, 14, 1, 11, 15, 12, 7, 3, 4, 8}) == 25); // (Classroom 3)
+    assert(A_Star_Algorithm({15, 9, 0, 7, 13, 1, 11, 14, 5, 4, 10, 2, 3, 8, 6, 12}) == 46); // (Classroom 4)
+    assert(A_Star_Algorithm({5, 13, 6, 10, 1, 7, 2, 9, 4, 3, 15, 14, 8, 0, 11, 12}) == 20); // (Extra 1)
+    assert(A_Star_Algorithm({2, 10, 11, 9, 3, 1, 0, 13, 4, 6, 7, 14, 5, 8, 12, 15}) == 27); // (Extra 2)
+    assert(A_Star_Algorithm({0, 2, 9, 13, 3, 1, 5, 14, 4, 7, 6, 10, 8, 11, 12, 15}) == 18); // (Final 1)
+    assert(A_Star_Algorithm({3, 2, 1, 9, 0, 5, 6, 13, 4, 7, 10, 14, 8, 12, 15, 11}) == 19); // (Final 2)
+    assert(A_Star_Algorithm({2, 1, 9, 13, 3, 5, 10, 14, 4, 6, 11, 15, 7, 8, 12, 0}) == 12); // (Final 3)
+    assert(A_Star_Algorithm({9, 13, 10, 0, 5, 2, 6, 14, 1, 7, 11, 15, 3, 4, 8, 12}) == 21); // (Final 4)
+    assert(A_Star_Algorithm({4, 3, 2, 1, 8, 10, 11, 5, 12, 6, 0, 9, 15, 7, 14, 13}) == 38); // (Final 5)
+    assert(A_Star_Algorithm({9, 13, 14, 15, 5, 6, 10, 8, 0, 1, 11, 12, 7, 2, 3, 4}) == 32); // (Final 6)
+    assert(A_Star_Algorithm({10, 6, 2, 1, 7, 13, 9, 5, 0, 15, 14, 12, 11, 3, 4, 8}) == 38); // (Final 7)
+    assert(A_Star_Algorithm({6, 2, 1, 5, 4, 10, 13, 9, 0, 8, 3, 7, 12, 15, 11, 14}) == 32); // (Final 8)
+    assert(A_Star_Algorithm({10, 13, 15, 0, 5, 9, 14, 11, 1, 2, 6, 7, 3, 4, 8, 12}) == 27); // (Final 9)
+    assert(A_Star_Algorithm({5, 9, 13, 14, 1, 6, 7, 10, 11, 15, 12, 0, 8, 2, 3, 4}) == 29); // (Final 10)
     */
 }
